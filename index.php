@@ -28,28 +28,46 @@
             <button type="submit" class="btn btn-primary">calculate</button>
         </form>
 
-        <?php
+         <?php
+        // Fungsi untuk mengira kuasa dalam kilowatt (kW)
+        function calculatePower($voltage, $current) {
+            return ($voltage * $current) / 1000; // Mengira kuasa dalam kW
+        }
+
+        // Fungsi untuk menukar kadar dari sen ke RM
+        function convertRateToRM($rate) {
+            return $rate / 100;
+        }
+
+        // Fungsi untuk mengira penggunaan tenaga dalam kWh
+        function calculateEnergy($power, $hour) {
+            return $power * $hour; // Mengira tenaga dalam kWh
+        }
+
+        // Fungsi untuk mengira jumlah kos
+        function calculateTotalCost($energy, $rate_in_rm) {
+            return $energy * $rate_in_rm; // Mengira jumlah kos dalam RM
+        }
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $voltage = $_POST['voltage'];
             $current = $_POST['current'];
             $rate = $_POST['rate'];
 
-            // Calculate power
-            $power = $voltage * $current; // in watts
-            $power_kw = $power / 1000; // Convert to kilowatts
+            // Kira kuasa dalam kW
+            $power_kw = calculatePower($voltage, $current);
 
-            // Convert rate from sen to RM
-            $rate_in_rm = $rate / 100;
+            // Tukar kadar ke RM
+            $rate_in_rm = convertRateToRM($rate);
 
-            $customBlue = "#007bff"; 
+            $customBlue = "#007bff";
 
+            // Paparkan keputusan kuasa dan kadar
+            echo "<div class='p-3 mt-4' style='border: 2px solid $customBlue; background-color: white;'>
+                <strong style='color: $customBlue;'>POWER :</strong> <strong style='color: $customBlue;'>" . number_format($power_kw, 5) . "kW</strong><br>
+                <strong style='color: $customBlue;'>RATE :</strong> <strong style='color: $customBlue;'>" . number_format($rate_in_rm, 3) . "RM</strong>
+            </div>";
 
-        echo "<div class='p-3 mt-4' style='border: 2px solid $customBlue; background-color: white;'>
-        <strong style='color: $customBlue;'>POWER :</strong> <strong style='color: $customBlue;'>" . number_format($power_kw, 5) . "kW</strong><br>
-        <strong style='color: $customBlue;'>RATE :</strong> <strong style='color: $customBlue;'>" . number_format($rate_in_rm, 3) . "RM</strong>
-      </div>";
-
-            
             echo "<h3 class='mt-4'></h3>";
             echo "<table class='table table-bordered'>";
             echo "<thead>
@@ -62,11 +80,10 @@
                 </thead>";
             echo "<tbody>";
 
+            // Kira penggunaan tenaga dan jumlah kos untuk setiap jam
             for ($hour = 1; $hour <= 24; $hour++) {
-                // Calculate energy consumption in kWh
-                $energy = ($power * $hour) / 1000;
-                // Calculate total cost
-                $total = $energy * $rate_in_rm;
+                $energy = calculateEnergy($power_kw, $hour);
+                $total = calculateTotalCost($energy, $rate_in_rm);
 
                 echo "<tr><td><strong>$hour</strong></td><td>$hour</td><td>" . number_format($energy, 5) . "</td><td>" . number_format($total, 2) . "</td></tr>";
             }
@@ -76,5 +93,6 @@
     </div>
 </body>
 </html>
+
 
 
